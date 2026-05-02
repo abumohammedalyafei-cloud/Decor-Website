@@ -1,32 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Mobile Menu Toggle
     const menuBtn = document.getElementById('mobile-menu-btn');
+    const closeBtn = document.getElementById('close-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileLinks = document.querySelectorAll('.mobile-link');
 
-    if(menuBtn) {
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('active');
-            const icon = menuBtn.querySelector('i');
+    if (menuBtn && mobileMenu) {
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mobileMenu.classList.add('active');
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+            });
+        }
+
+        // Close mobile menu when clicking a link
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
             if (mobileMenu.classList.contains('active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-xmark');
-            } else {
-                icon.classList.remove('fa-xmark');
-                icon.classList.add('fa-bars');
+                if (!mobileMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+                    mobileMenu.classList.remove('active');
+                }
             }
         });
     }
-
-    // Close mobile menu when clicking a link
-    mobileLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            mobileMenu.classList.remove('active');
-            const icon = menuBtn.querySelector('i');
-            icon.classList.remove('fa-xmark');
-            icon.classList.add('fa-bars');
-        });
-    });
 
     // Change Header Background on Scroll
     const header = document.querySelector('.header');
@@ -40,8 +46,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // FAQ Accordion
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        question.addEventListener('click', () => {
+            const isOpen = item.classList.contains('active');
+            
+            // Close all other items
+            faqItems.forEach(otherItem => otherItem.classList.remove('active'));
+            
+            // Toggle current item
+            if (!isOpen) {
+                item.classList.add('active');
+            }
+        });
+    });
+
     // Add scroll animation reveal for elements
-    const revealElements = document.querySelectorAll('.service-card, .gallery-item, .section-title');
+    const revealElements = document.querySelectorAll('.service-card, .gallery-item, .section-title, .footer-info, .footer-links, .footer-contact, .feature-item, .faq-item');
     
     const revealCallback = (entries, observer) => {
         entries.forEach(entry => {
@@ -60,10 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const revealObserver = new IntersectionObserver(revealCallback, revealOptions);
 
-    revealElements.forEach(el => {
+    revealElements.forEach((el, index) => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';
-        el.style.transition = 'all 0.6s ease-out';
+        el.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        // Add a slight stagger delay for elements in the same viewport
+        el.style.transitionDelay = `${(index % 3) * 0.15}s`;
         revealObserver.observe(el);
     });
 });
